@@ -1,0 +1,9 @@
+# Step 1: Run ETL to load data
+python etl.py
+
+# Step 2: Launch the dashboard
+streamlit run streamlit_app.py
+
+Or 
+
+python -m streamlit run streamlit_app.py
