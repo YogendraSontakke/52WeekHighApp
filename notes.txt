@@ -1,0 +1,10 @@
+📁 52WeekHighApp/
+├── 📄 streamlit_app.py             ← Main entry point
+├── 📁 views/
+│   ├── 📄 1_Momentum_Summary.py    ← Table + filters
+│   ├── 📄 2_Sector_Heatmap.py      ← Static + animated heatmaps
+│   ├── 📄 3_Top_Performers.py      ← Top companies per sector
+│   ├── 📄 4_Daily_Viewer.py        ← Daily highs by date
+├── 📄 db_utils.py                  ← Database access functions
+├── 📄 plot_utils.py                ← Charting functions (heatmap, line chart)
+├── 📄 config.py                    ← Constants like DB path
