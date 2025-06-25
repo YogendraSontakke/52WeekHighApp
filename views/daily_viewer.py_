@@ -1,0 +1,59 @@
+import streamlit as st
+from db_utils import get_all_dates, get_data_for_date
+
+def main():
+    st.title("📅 Daily 52-Week Highs Viewer")
+
+    dates = get_all_dates()
+    if not dates:
+        st.warning("No data available.")
+        return
+
+    selected_date = st.selectbox("Select a date", dates)
+
+    daily_df = get_data_for_date(selected_date)
+
+    if daily_df.empty:
+        st.warning(f"No data for {selected_date}")
+        return
+
+    # --- Industry Filter
+    industries = sorted(daily_df["industry"].dropna().unique().tolist())
+    industries.insert(0, "All")
+    selected_industry = st.selectbox("Filter by Industry", industries)
+
+    filtered_df = daily_df.copy()
+    if selected_industry != "All":
+        filtered_df = filtered_df[filtered_df["industry"] == selected_industry]
+
+    st.markdown(
+        f"Showing **{len(filtered_df)}** records for **{selected_date}**"
+        + (f" in **{selected_industry}**" if selected_industry != "All" else "")
+    )
+
+    if filtered_df.empty:
+        st.info("No records match the filters.")
+        return
+
+    # --- Grouped Display by Industry
+    st.markdown("### 🏭 Grouped View by Industry")
+
+    grouped = (
+        filtered_df
+        .sort_values(["industry", "market_cap"], ascending=[True, False])
+        .groupby("industry")
+    )
+
+    for industry, group_df in grouped:
+        st.markdown(f"#### 🏷️ {industry} ({len(group_df)} companies)")
+        st.dataframe(
+            group_df.drop(columns=["industry"]),  # avoid repeating industry
+            use_container_width=True,
+        )
+
+    # --- Download
+    st.download_button(
+        "📥 Download CSV",
+        data=filtered_df.to_csv(index=False),
+        file_name=f"highs_{selected_date}_{selected_industry if selected_industry != 'All' else 'all'}.csv"
+    )

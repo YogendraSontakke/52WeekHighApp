@@ -10,7 +10,7 @@ page_options = {
     "📈 Momentum Summary": "momentum_summary",
     "🔥 Sector Heatmap": "sector_heatmap",
     "🏆 Top Performers": "top_performers",
-    "📅 Daily Highs Viewer": "daily_viewer",
+    "📅 Daily Highs Viewer": "daily_viewer",    
 }
 
 page_selection = st.sidebar.radio("Go to", list(page_options.keys()))
