@@ -8,7 +8,7 @@ st.set_page_config(page_title="52-Week High Tracker", layout="wide")
 st.sidebar.title("📊 Navigation")
 page_options = {
     "📈 Momentum Summary": "momentum_summary",
-    "🔥 Sector Heatmap": "sector_heatmap",
+#    "🔥 Sector Heatmap": "sector_heatmap",
 #    "🏆 Top Performers": "top_performers",
     "🏆 Top Performers": "top_performers_grouped",
     "📅 Daily Highs Viewer": "daily_viewer",    
