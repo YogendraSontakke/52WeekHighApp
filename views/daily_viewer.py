@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from db_utils import get_all_dates, get_data_for_date
-import datetime # Import datetime for date objects
+import datetime
+from dateutil.relativedelta import relativedelta
 
 def main():
     st.title("📅 Daily 52-Week Highs Viewer")
@@ -11,79 +12,127 @@ def main():
         st.warning("No data available.")
         return
 
-    # Ensure dates are sorted in ascending order (important for min_date, max_date)
+																				   
     # Convert to datetime objects for reliable sorting.
     dates = sorted([pd.to_datetime(d).date() for d in dates])
-																					  
-																										 
-																		 
+					   
+						   
+				   
     
-    # Now, min_date will reliably be the earliest date and max_date the latest
+																			  
     min_date_available = dates[0]
     max_date_available = dates[-1]
 
     # Select mode of date selection
     date_mode = st.radio("Select Date Mode", ["Single Date", "Date Range", "All Dates"])
 
-    daily_df = pd.DataFrame() # Initialize daily_df as an empty DataFrame
+    daily_df = pd.DataFrame() # Initialize daily_df
 
     if date_mode == "Single Date":
-        # To default to the latest date, we set the index of the selectbox
-        # to the last element of the sorted `dates` list.
+        # Default to the latest date
+														 
         selected_date = st.selectbox(
             "Select a date", 
             dates, 
-            index=len(dates) - 1
+            index=len(dates) - 1,
+            format_func=lambda date: date.strftime("%Y-%m-%d") # Format for display
         )
-        # Ensure get_data_for_date can handle datetime.date objects or convert
-        daily_df = get_data_for_date(selected_date.strftime("%Y-%m-%d")) # Convert back to string for db_utils if it expects string
+																			  
+        daily_df = get_data_for_date(selected_date.strftime("%Y-%m-%d"))
         
     elif date_mode == "Date Range":
-        # Use the reliably sorted min_date_available and max_date_available
+        st.subheader("Date Range Selection")
+
+        # Set default values
+        end_date_default = max_date_available
+        start_date_default = min_date_available
+        
+        # Use columns for a cleaner layout
+        col1, col2 = st.columns([1, 2])
+
+        with col1:
+            range_method = st.radio(
+                "Define range by:",
+                ("Presets", "Last 'y' days", "Last 'x' months")
+            )
+
+        with col2:
+            if range_method == "Presets":
+                preset = st.selectbox(
+                    "Select preset period:",
+                    ("Last 7 Days", "Last 14 Days", "Last 1 Month", "Last 3 Months", "Last 6 Months")
+                )
+                if preset == "Last 7 Days":
+                    start_date_default = max_date_available - relativedelta(days=6)
+                elif preset == "Last 14 Days":
+                    start_date_default = max_date_available - relativedelta(days=13)
+                elif preset == "Last 1 Month":
+                    start_date_default = max_date_available - relativedelta(months=1)
+                elif preset == "Last 3 Months":
+                    start_date_default = max_date_available - relativedelta(months=3)
+                elif preset == "Last 6 Months":
+                    start_date_default = max_date_available - relativedelta(months=6)
+
+            elif range_method == "Last 'y' days":
+                num_days = st.number_input("Enter days (y):", min_value=1, value=7)
+                start_date_default = max_date_available - relativedelta(days=num_days - 1)
+            
+            elif range_method == "Last 'x' months":
+                num_months = st.number_input("Enter months (x):", min_value=1, value=3)
+                start_date_default = max_date_available - relativedelta(months=num_months)
+
+        # Ensure calculated start date is not before the earliest available date
+        if start_date_default < min_date_available:
+            start_date_default = min_date_available
+            st.caption(f"Note: Range start adjusted to the earliest available date: {min_date_available.strftime('%Y-%m-%d')}")
+
+        st.markdown("---")
+        st.write("You can adjust the final dates below:")
+
         start_date = st.date_input(
             "Start date", 
-            value=min_date_available, # Default to the earliest available date
+            value=start_date_default,
             min_value=min_date_available, 
             max_value=max_date_available
         )
         end_date = st.date_input(
             "End date", 
-            value=max_date_available, # Default to the latest available date
+            value=end_date_default,
             min_value=min_date_available, 
             max_value=max_date_available
         )
 
-        # Validate date order (user input validation)
+        # Validate date order
         if start_date > end_date:
             st.error("Start date must be before or equal to end date.")
             return
 
-        # Convert dates to strings matching your date format in db_utils (assuming 'YYYY-MM-DD')
+																								
         start_str = start_date.strftime("%Y-%m-%d")
         end_str = end_date.strftime("%Y-%m-%d")
 
-        # Filter dates in the range (from the original `dates` list which is now sorted and converted)
+																									  
         selected_dates_str = [d.strftime("%Y-%m-%d") for d in dates if start_date <= d <= end_date]
         if not selected_dates_str:
             st.warning("No data available in the selected date range.")
             return
 
-        # Load and concatenate data for all selected dates
+														  
         dfs = [get_data_for_date(d_str) for d_str in selected_dates_str]
-        if dfs: # Ensure there's data to concatenate
+        if dfs:
             daily_df = pd.concat(dfs, ignore_index=True)
             if 'name' in daily_df.columns:
                 daily_df.drop_duplicates(subset=['name'], inplace=True)
             else:
-                st.error("Error: 'name' column not found in the DataFrame for unique identification. Please check your data source.")
+                st.error("Error: 'name' column not found.")
                 return 
         else:
             st.warning("No data found for the selected date range after fetching.")
             return
             
     else:  # All Dates
-        # Load and concatenate data for all dates
-        # Convert dates back to string for get_data_for_date
+												 
+															
         all_dates_str = [d.strftime("%Y-%m-%d") for d in dates]
         dfs = [get_data_for_date(d_str) for d_str in all_dates_str]
         if dfs: 
@@ -91,7 +140,7 @@ def main():
             if 'name' in daily_df.columns:
                 daily_df.drop_duplicates(subset=['name'], inplace=True)
             else:
-                st.error("Error: 'name' column not found in the DataFrame for unique identification. Please check your data source.")
+                st.error("Error: 'name' column not found.")
                 return 
         else:
             st.warning("No data found for all dates after fetching.")
@@ -101,7 +150,7 @@ def main():
         st.warning("No data available for the selected date(s) after processing.")
         return
 
-    # --- Industry Filter (same as before)
+    # --- Industry Filter
     industries = sorted(daily_df["industry"].dropna().unique().tolist())
     industries.insert(0, "All")
     selected_industry = st.selectbox("Filter by Industry", industries)
@@ -110,11 +159,11 @@ def main():
     if selected_industry != "All":
         filtered_df = filtered_df[filtered_df["industry"] == selected_industry]
 
-    # Show count and date info
+    # --- Show count and date info
     if date_mode == "Single Date":
-        date_info = selected_date.strftime("%Y-%m-%d") # Format for display
+        date_info = selected_date.strftime("%Y-%m-%d")
     elif date_mode == "Date Range":
-        date_info = f"{start_str} to {end_str}"
+        date_info = f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
     else:
         date_info = "All Dates"
 
@@ -127,12 +176,12 @@ def main():
         st.info("No records match the filters.")
         return
 
-    # --- Grouped Display by Industry (unchanged)
+    # --- Grouped Display by Industry
     st.markdown("---") 
     st.markdown("### 🏭 Grouped View by Industry")
 
     if 'industry' not in filtered_df.columns:
-        st.error("Error: 'industry' column not found. Cannot group by industry.")
+        st.error("Error: 'industry' column not found.")
         return
 
     grouped = (
