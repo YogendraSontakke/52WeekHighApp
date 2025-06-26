@@ -11,7 +11,7 @@ page_options = {
     "📈 Momentum Summary": "momentum_summary",
     "🏆 Top Performers": "top_performers_grouped",
 #    "🔥 Sector Heatmap": "sector_heatmap",
-#    "🏆 Top Performers": "top_performers",    
+    "🏆 Momentum Summary Alt": "momentum_summary_updated",    
 }
 
 page_selection = st.sidebar.radio("Go to", list(page_options.keys()))
