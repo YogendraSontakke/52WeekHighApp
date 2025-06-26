@@ -7,11 +7,10 @@ st.set_page_config(page_title="52-Week High Tracker", layout="wide")
 # Sidebar navigation
 st.sidebar.title("📊 Navigation")
 page_options = {
+    "📅 Daily Highs Viewer": "daily_viewer",
     "📈 Momentum Summary": "momentum_summary",
-#    "🔥 Sector Heatmap": "sector_heatmap",
-#    "🏆 Top Performers": "top_performers",
     "🏆 Top Performers": "top_performers_grouped",
-    "📅 Daily Highs Viewer": "daily_viewer",    
+#    "🔥 Sector Heatmap": "sector_heatmap",
 }
 
 page_selection = st.sidebar.radio("Go to", list(page_options.keys()))
