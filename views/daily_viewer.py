@@ -12,11 +12,11 @@ def main():
         return
 
     # Ensure dates are sorted in ascending order (important for min_date, max_date)
-    # Convert to datetime objects for reliable sorting, then back to string if needed later
-    dates = sorted([pd.to_datetime(d).date() for d in dates]) 
-    # Convert back to string for consistency if get_data_for_date expects string dates
-    # If get_data_for_date can handle datetime.date objects, you can skip this conversion back to string.
-    # For now, let's keep them as datetime.date objects for st.date_input
+    # Convert to datetime objects for reliable sorting.
+    dates = sorted([pd.to_datetime(d).date() for d in dates])
+																					  
+																										 
+																		 
     
     # Now, min_date will reliably be the earliest date and max_date the latest
     min_date_available = dates[0]
@@ -28,8 +28,13 @@ def main():
     daily_df = pd.DataFrame() # Initialize daily_df as an empty DataFrame
 
     if date_mode == "Single Date":
-        # Streamlit's selectbox can handle datetime.date objects
-        selected_date = st.selectbox("Select a date", dates)
+        # To default to the latest date, we set the index of the selectbox
+        # to the last element of the sorted `dates` list.
+        selected_date = st.selectbox(
+            "Select a date", 
+            dates, 
+            index=len(dates) - 1
+        )
         # Ensure get_data_for_date can handle datetime.date objects or convert
         daily_df = get_data_for_date(selected_date.strftime("%Y-%m-%d")) # Convert back to string for db_utils if it expects string
         
