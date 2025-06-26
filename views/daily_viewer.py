@@ -12,14 +12,9 @@ def main():
         st.warning("No data available.")
         return
 
-																				   
     # Convert to datetime objects for reliable sorting.
     dates = sorted([pd.to_datetime(d).date() for d in dates])
-					   
-						   
-				   
     
-																			  
     min_date_available = dates[0]
     max_date_available = dates[-1]
 
@@ -30,14 +25,12 @@ def main():
 
     if date_mode == "Single Date":
         # Default to the latest date
-														 
         selected_date = st.selectbox(
             "Select a date", 
             dates, 
             index=len(dates) - 1,
             format_func=lambda date: date.strftime("%Y-%m-%d") # Format for display
         )
-																			  
         daily_df = get_data_for_date(selected_date.strftime("%Y-%m-%d"))
         
     elif date_mode == "Date Range":
@@ -58,7 +51,7 @@ def main():
 
         with col2:
             if range_method == "Presets":
-                preset = st.selectbox(
+                preset = st.radio(
                     "Select preset period:",
                     ("Last 7 Days", "Last 14 Days", "Last 1 Month", "Last 3 Months", "Last 6 Months")
                 )
@@ -107,17 +100,14 @@ def main():
             st.error("Start date must be before or equal to end date.")
             return
 
-																								
         start_str = start_date.strftime("%Y-%m-%d")
         end_str = end_date.strftime("%Y-%m-%d")
 
-																									  
         selected_dates_str = [d.strftime("%Y-%m-%d") for d in dates if start_date <= d <= end_date]
         if not selected_dates_str:
             st.warning("No data available in the selected date range.")
             return
 
-														  
         dfs = [get_data_for_date(d_str) for d_str in selected_dates_str]
         if dfs:
             daily_df = pd.concat(dfs, ignore_index=True)
@@ -131,8 +121,6 @@ def main():
             return
             
     else:  # All Dates
-												 
-															
         all_dates_str = [d.strftime("%Y-%m-%d") for d in dates]
         dfs = [get_data_for_date(d_str) for d_str in all_dates_str]
         if dfs: 
