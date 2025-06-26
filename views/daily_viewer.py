@@ -18,8 +18,12 @@ def main():
     min_date_available = dates[0]
     max_date_available = dates[-1]
 
-    # Select mode of date selection
-    date_mode = st.radio("Select Date Mode", ["Single Date", "Date Range", "All Dates"])
+    # Select mode of date selection, with "Date Range" as default
+    date_mode = st.radio(
+        "Select Date Mode", 
+        ["Single Date", "Date Range", "All Dates"],
+        index=1  # Set "Date Range" as default
+    )
 
     daily_df = pd.DataFrame() # Initialize daily_df
 
@@ -53,9 +57,11 @@ def main():
             if range_method == "Presets":
                 preset = st.radio(
                     "Select preset period:",
-                    ("Last 7 Days", "Last 14 Days", "Last 1 Month", "Last 3 Months", "Last 6 Months")
+                    ("1 Day", "Last 7 Days", "Last 14 Days", "Last 1 Month", "Last 3 Months", "Last 6 Months")
                 )
-                if preset == "Last 7 Days":
+                if preset == "1 Day":
+                    start_date_default = max_date_available
+                elif preset == "Last 7 Days":
                     start_date_default = max_date_available - relativedelta(days=6)
                 elif preset == "Last 14 Days":
                     start_date_default = max_date_available - relativedelta(days=13)
