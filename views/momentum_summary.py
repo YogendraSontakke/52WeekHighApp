@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from db_utils import get_momentum_summary, get_historical_market_cap
+from db_utils import get_momentum_summary, get_historical_market_cap, add_screener_links
 from plot_utils import market_cap_line_chart
 
 def main():

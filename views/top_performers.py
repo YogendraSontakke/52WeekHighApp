@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-from db_utils import get_momentum_summary, get_sparkline_data
+from db_utils import get_momentum_summary, get_sparkline_data. add_screener_links
 import plotly.graph_objects as go
 
 def main():
