@@ -9,14 +9,12 @@ from config import DB_PATH
 # 🔗  Convenience: add clickable links for Screener.in
 # ----------------------------------------------------------------------
 def _make_link(code: pd.Series) -> pd.Series:
-    """
-    Return a Series of Markdown links for either BSE or NSE codes.
-    A blank string is returned for missing values so Streamlit will
-    display an empty cell instead of 'nan'.
-    """
-    return code.apply(
-        lambda x: f"[{int(x)}](https://www.screener.in/company/{int(x)}/)" if pd.notna(x) else ""
-    )
+    def safe_link(x):
+        try:
+            return f"[{int(x)}](https://www.screener.in/company/{int(x)}/)"
+        except (ValueError, TypeError):
+            return ""
+    return code.apply(safe_link)
 
 
 def add_screener_links(df: pd.DataFrame) -> pd.DataFrame:
