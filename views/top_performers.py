@@ -25,8 +25,6 @@ def main():
         .reset_index()
         .rename(columns={metric_choice: "total_hits"})
     )
-    df = add_screener_links(df)  # <-- convert just before display
-    st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
 
     st.markdown(f"### 🧭 Click to Select One or More Sectors (by **{metric_choice}**)")
 
@@ -93,12 +91,15 @@ def main():
     filtered_df = df[df["industry"].isin(selected_sectors)].sort_values(
         by=["industry", "%_gain_mc"], ascending=[True, False]
     )
+    
+    filtered_df = add_screener_links(filtered_df)
 
     st.markdown(f"### 📊 Showing **{len(filtered_df)}** companies from {len(selected_sectors)} selected sector(s)")
 
-    st.dataframe(
-        filtered_df[["industry", "name", "nse_code", "market_cap", "%_gain_mc", "hits_7", "hits_30", "hits_60", "first_seen_date"]],
-        use_container_width=True
+    st.markdown(
+        filtered_df[["industry", "name", "nse_code", "bse_code", "market_cap", "%_gain_mc", "hits_7", "hits_30", "hits_60", "first_seen_date"]]
+        .to_markdown(index=False),
+        unsafe_allow_html=True
     )
 
     st.download_button(

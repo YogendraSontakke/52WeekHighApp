@@ -24,6 +24,7 @@ def main():
     
     # Filter the DataFrame based on sidebar selections
     filtered_df = df.copy()
+    filtered_df = add_screener_links(filtered_df)
     if selected_industry != "All":
         filtered_df = filtered_df[filtered_df['industry'] == selected_industry]
 

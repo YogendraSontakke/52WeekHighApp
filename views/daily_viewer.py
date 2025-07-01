@@ -84,10 +84,7 @@ def main():
         if start_date_default < min_date_available:
             start_date_default = min_date_available
             st.caption(f"Note: Range start adjusted to the earliest available date: {min_date_available.strftime('%Y-%m-%d')}")
-
-        df = add_screener_links(df)  # <-- convert just before display
-        st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
-        
+     
         st.markdown("---")
         st.write("You can adjust the final dates below:")
 
@@ -153,6 +150,8 @@ def main():
     selected_industry = st.selectbox("Filter by Industry", industries)
 
     filtered_df = daily_df.copy()
+    filtered_df = add_screener_links(filtered_df)
+    st.markdown(filtered_df.to_markdown(index=False), unsafe_allow_html=True)
     if selected_industry != "All":
         filtered_df = filtered_df[filtered_df["industry"] == selected_industry]
 
