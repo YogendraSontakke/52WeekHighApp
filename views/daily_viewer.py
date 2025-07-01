@@ -85,6 +85,9 @@ def main():
             start_date_default = min_date_available
             st.caption(f"Note: Range start adjusted to the earliest available date: {min_date_available.strftime('%Y-%m-%d')}")
 
+        df = add_screener_links(df)  # <-- convert just before display
+        st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
+        
         st.markdown("---")
         st.write("You can adjust the final dates below:")
 

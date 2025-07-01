@@ -42,7 +42,10 @@ def main():
         valid_grouping_options, 
         index=valid_grouping_options.index("industry") if "industry" in valid_grouping_options else 0
     )
-
+    
+    df = add_screener_links(df)  # <-- convert just before display
+    st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
+    
     st.markdown("---")
 
     # Display data (grouped or ungrouped)

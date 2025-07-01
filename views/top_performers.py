@@ -25,6 +25,8 @@ def main():
         .reset_index()
         .rename(columns={metric_choice: "total_hits"})
     )
+    df = add_screener_links(df)  # <-- convert just before display
+    st.markdown(df.to_markdown(index=False), unsafe_allow_html=True)
 
     st.markdown(f"### 🧭 Click to Select One or More Sectors (by **{metric_choice}**)")
 
