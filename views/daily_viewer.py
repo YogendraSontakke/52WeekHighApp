@@ -18,40 +18,32 @@ def main():
     min_date_available = dates[0]
     max_date_available = dates[-1]
 
-    # Select mode of date selection, with "Date Range" as default
     date_mode = st.radio(
         "Select Date Mode", 
         ["Single Date", "Date Range", "All Dates"],
-        index=1  # Set "Date Range" as default
+        index=1
     )
 
-    daily_df = pd.DataFrame() # Initialize daily_df
+    daily_df = pd.DataFrame()
 
     if date_mode == "Single Date":
-        # Default to the latest date
         selected_date = st.selectbox(
             "Select a date", 
             dates, 
             index=len(dates) - 1,
-            format_func=lambda date: date.strftime("%Y-%m-%d") # Format for display
+            format_func=lambda date: date.strftime("%Y-%m-%d")
         )
         daily_df = get_data_for_date(selected_date.strftime("%Y-%m-%d"))
         
     elif date_mode == "Date Range":
         st.subheader("Date Range Selection")
 
-        # Set default values
         end_date_default = max_date_available
         start_date_default = min_date_available
         
-        # Use columns for a cleaner layout
         col1, col2 = st.columns([1, 2])
-
         with col1:
-            range_method = st.radio(
-                "Define range by:",
-                ("Presets", "Last 'y' days", "Last 'x' months")
-            )
+            range_method = st.radio("Define range by:", ("Presets", "Last 'y' days", "Last 'x' months"))
 
         with col2:
             if range_method == "Presets":
@@ -80,34 +72,19 @@ def main():
                 num_months = st.number_input("Enter months (x):", min_value=1, value=3)
                 start_date_default = max_date_available - relativedelta(months=num_months)
 
-        # Ensure calculated start date is not before the earliest available date
         if start_date_default < min_date_available:
             start_date_default = min_date_available
-            st.caption(f"Note: Range start adjusted to the earliest available date: {min_date_available.strftime('%Y-%m-%d')}")
-     
+            st.caption(f"Note: Range start adjusted to earliest available date: {min_date_available.strftime('%Y-%m-%d')}")
+
         st.markdown("---")
         st.write("You can adjust the final dates below:")
 
-        start_date = st.date_input(
-            "Start date", 
-            value=start_date_default,
-            min_value=min_date_available, 
-            max_value=max_date_available
-        )
-        end_date = st.date_input(
-            "End date", 
-            value=end_date_default,
-            min_value=min_date_available, 
-            max_value=max_date_available
-        )
+        start_date = st.date_input("Start date", value=start_date_default, min_value=min_date_available, max_value=max_date_available)
+        end_date = st.date_input("End date", value=end_date_default, min_value=min_date_available, max_value=max_date_available)
 
-        # Validate date order
         if start_date > end_date:
             st.error("Start date must be before or equal to end date.")
             return
-
-        start_str = start_date.strftime("%Y-%m-%d")
-        end_str = end_date.strftime("%Y-%m-%d")
 
         selected_dates_str = [d.strftime("%Y-%m-%d") for d in dates if start_date <= d <= end_date]
         if not selected_dates_str:
@@ -123,7 +100,7 @@ def main():
                 st.error("Error: 'name' column not found.")
                 return 
         else:
-            st.warning("No data found for the selected date range after fetching.")
+            st.warning("No data found for the selected date range.")
             return
             
     else:  # All Dates
@@ -137,11 +114,11 @@ def main():
                 st.error("Error: 'name' column not found.")
                 return 
         else:
-            st.warning("No data found for all dates after fetching.")
+            st.warning("No data found for all dates.")
             return
 
     if daily_df.empty:
-        st.warning("No data available for the selected date(s) after processing.")
+        st.warning("No data available after processing.")
         return
 
     # --- Industry Filter
@@ -150,8 +127,6 @@ def main():
     selected_industry = st.selectbox("Filter by Industry", industries)
 
     filtered_df = daily_df.copy()
-    filtered_df = add_screener_links(filtered_df)
-    st.markdown(filtered_df.to_markdown(index=False), unsafe_allow_html=True)
     if selected_industry != "All":
         filtered_df = filtered_df[filtered_df["industry"] == selected_industry]
 
@@ -188,13 +163,9 @@ def main():
 
     for industry, group_df in grouped:
         st.markdown(f"#### 🏷️ {industry} ({len(group_df)} companies)")
-        display_df = group_df.copy()
-        if 'industry' in display_df.columns:
-            display_df = display_df.drop(columns=["industry"])
-        st.dataframe(
-            display_df,
-            use_container_width=True,
-        )
+        display_df = group_df.drop(columns=["industry"], errors='ignore').copy()
+        display_df = add_screener_links(display_df)
+        st.markdown(display_df.to_markdown(index=False), unsafe_allow_html=True)
 
     # --- Download
     filename_date_part = date_info.replace(" ", "_").replace("to", "-").lower()

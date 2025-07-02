@@ -8,25 +8,25 @@ from config import DB_PATH
 # ----------------------------------------------------------------------
 # 🔗  Convenience: add clickable links for Screener.in
 # ----------------------------------------------------------------------
-def _make_link(code: pd.Series) -> pd.Series:
-    def safe_link(x):
+def add_screener_links(df: pd.DataFrame) -> pd.DataFrame:
+    def link_bse(x):
         try:
             return f"[{int(x)}](https://www.screener.in/company/{int(x)}/)"
         except (ValueError, TypeError):
             return ""
-    return code.apply(safe_link)
 
+    def link_nse(x):
+        try:
+            return f"[{x}](https://www.screener.in/company/{x}/)" if pd.notna(x) and str(x).strip() else ""
+        except Exception:
+            return ""
 
-def add_screener_links(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Replace in‑place the **bse_code** / **nse_code** columns with hyperlinks.
-    Call this *after* you’ve finished all numeric calculations and
-    *before* you render the table with `st.markdown(df.to_markdown(...))`.
-    """
     if "bse_code" in df.columns:
-        df["bse_code"] = _make_link(df["bse_code"])
+        df["bse_code"] = df["bse_code"].apply(link_bse)
+
     if "nse_code" in df.columns:
-        df["nse_code"] = _make_link(df["nse_code"])
+        df["nse_code"] = df["nse_code"].apply(link_nse)
+
     return df
 
 
