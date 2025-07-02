@@ -49,11 +49,14 @@ def main():
 
     # --- Display --------------------------------------------------------
     if group_by_col != "None":
-        st.markdown(f"### 🏭 Grouped View by {group_by_col.capitalize()}")
+        st.markdown(f"### 🏭 Grouped View by {group_by_col.capitalize()}")
+
+        filtered_df[group_by_col] = filtered_df[group_by_col].fillna("None")
+
         grouped = (
-            filtered_df.sort_values(
-                [group_by_col, "hits_30", "hits_7"], ascending=[True, False, False]
-            ).groupby(group_by_col)
+            filtered_df
+            .sort_values([group_by_col, "hits_30", "hits_7"], ascending=[True, False, False])
+            .groupby(group_by_col)
         )
         for group_name, group_df in grouped:
             st.markdown(f"#### 🏷️ {group_name} ({len(group_df)} companies)")

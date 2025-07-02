@@ -13,6 +13,8 @@ def main():
         "📈 Choose Activity Metric", ["hits_7", "hits_30", "hits_60"], horizontal=True
     )
 
+    df["industry"] = df["industry"].fillna("None")
+
     # --- Sector Hit Counts ---------------------------------------------
     sector_hits = (
         df.groupby("industry")[metric_choice]
@@ -21,6 +23,7 @@ def main():
         .reset_index()
         .rename(columns={metric_choice: "total_hits"})
     )
+
 
     st.markdown(f"### 🧭 Click to Select One or More Sectors (by **{metric_choice}**)")
 

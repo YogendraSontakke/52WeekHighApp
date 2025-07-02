@@ -155,6 +155,8 @@ def main():
         st.error("Error: 'industry' column not found.")
         return
 
+    filtered_df["industry"] = filtered_df["industry"].fillna("None")
+
     grouped = (
         filtered_df
         .sort_values(["industry", "market_cap"], ascending=[True, False])
