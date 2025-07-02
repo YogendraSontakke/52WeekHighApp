@@ -58,16 +58,33 @@ def main():
             .sort_values([group_by_col, "hits_30", "hits_7"], ascending=[True, False, False])
             .groupby(group_by_col)
         )
+
         for group_name, group_df in grouped:
-            st.markdown(f"#### 🏷️ {group_name} ({len(group_df)} companies)")
-            display_df = group_df.drop(columns=[group_by_col]).copy()
+            st.markdown(f"#### 🏷️ {group_name} ({len(group_df)} companies)")
+
+            display_cols = [
+                "name", "nse_code", "bse_code",
+                "market_cap", "first_market_cap", "%_gain_mc",
+                "hits_7", "hits_30", "hits_60", "first_seen_date"
+            ]
+            display_df = group_df[display_cols].copy()
+            display_df = display_df.rename(columns={"%_gain_mc": "Δ% MCap"})
             display_df = add_screener_links(display_df)
+
             st.markdown(display_df.to_markdown(index=False), unsafe_allow_html=True)
+
     else:
-        display_df = add_screener_links(
-            filtered_df.sort_values(by=["hits_30", "hits_7"], ascending=False).copy()
-        )
+        display_cols = [
+            "industry", "name", "nse_code", "bse_code",
+            "market_cap", "first_market_cap", "%_gain_mc",
+            "hits_7", "hits_30", "hits_60", "first_seen_date"
+        ]
+        display_df = filtered_df[display_cols].copy()
+        display_df = display_df.rename(columns={"%_gain_mc": "Δ% MCap"})
+        display_df = add_screener_links(display_df)
+
         st.markdown(display_df.to_markdown(index=False), unsafe_allow_html=True)
+
 
     # --- Download -------------------------------------------------------
     st.download_button(

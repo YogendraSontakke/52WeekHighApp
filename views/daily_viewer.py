@@ -148,10 +148,10 @@ def main():
         return
 
     # --- Grouped Display by Industry
-    st.markdown("---") 
+    st.markdown("---")
     st.markdown("### 🏭 Grouped View by Industry")
 
-    if 'industry' not in filtered_df.columns:
+    if "industry" not in filtered_df.columns:
         st.error("Error: 'industry' column not found.")
         return
 
@@ -165,9 +165,20 @@ def main():
 
     for industry, group_df in grouped:
         st.markdown(f"#### 🏷️ {industry} ({len(group_df)} companies)")
-        display_df = group_df.drop(columns=["industry"], errors='ignore').copy()
+
+        display_cols = [
+            "name", "nse_code", "bse_code",
+            "market_cap", "first_market_cap", "%_gain_mc"
+        ]
+        extra_cols = [col for col in ["hits_7", "hits_30", "hits_60", "first_seen_date"] if col in group_df.columns]
+        display_cols = ["industry"] + display_cols + extra_cols
+
+        display_df = group_df[display_cols].drop(columns=["industry"]).copy()
+        display_df = display_df.rename(columns={"%_gain_mc": "Δ% MCap"})
         display_df = add_screener_links(display_df)
+
         st.markdown(display_df.to_markdown(index=False), unsafe_allow_html=True)
+
 
     # --- Download
     filename_date_part = date_info.replace(" ", "_").replace("to", "-").lower()

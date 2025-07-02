@@ -88,29 +88,22 @@ def main():
     )
 
     # --- Display Table with Links --------------------------------------
-    display_df = add_screener_links(
-        filtered_df[
-            [
-                "industry",
-                "name",
-                "nse_code",
-                "bse_code",
-                "market_cap",
-                "%_gain_mc",
-                "hits_7",
-                "hits_30",
-                "hits_60",
-                "first_seen_date",
-            ]
-        ].copy()
+    st.markdown(
+        f"### 📊 Showing **{len(filtered_df)}** companies from {len(selected_sectors)} selected sector(s)"
     )
+
+    display_cols = [
+        "industry", "name", "nse_code", "bse_code",
+        "market_cap", "first_market_cap", "%_gain_mc",
+        "hits_7", "hits_30", "hits_60", "first_seen_date"
+    ]
+
+    display_df = filtered_df[display_cols].copy()
+    display_df = display_df.rename(columns={"%_gain_mc": "Δ% MCap"})
+    display_df = add_screener_links(display_df)
+
     st.markdown(display_df.to_markdown(index=False), unsafe_allow_html=True)
 
-    st.download_button(
-        "📥 Download CSV",
-        data=filtered_df.to_csv(index=False),
-        file_name=f"top_performers_{metric_choice}.csv",
-    )
 
     # --- Sparklines -----------------------------------------------------
     st.markdown("### 📈 Company Momentum Sparklines (52‑Week‑High Presence)")
