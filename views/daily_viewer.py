@@ -1,8 +1,15 @@
 import streamlit as st
 import pandas as pd
-from db_utils import get_all_dates, get_data_for_date, add_screener_links
 import datetime
 from dateutil.relativedelta import relativedelta
+from db_utils import (
+    get_all_dates,
+    get_data_for_date,
+    add_screener_links,
+    get_historical_market_cap,   # 👈 NEW
+)
+
+
 
 def main():
     st.title("📅 Daily 52-Week Highs Viewer")
@@ -121,6 +128,33 @@ def main():
         st.warning("No data available after processing.")
         return
 
+
+    # ------------------------------------------------------------------
+    # 🏷️  Ensure 'first_market_cap' & Δ% MCap are present
+    # ------------------------------------------------------------------
+    if "first_market_cap" not in daily_df.columns or daily_df["first_market_cap"].isna().all():
+        # Load the full history once
+        hist_df = get_historical_market_cap()
+
+        # The earliest market‑cap for every company
+        first_caps = (
+            hist_df.sort_values("date")
+            .groupby("name", as_index=False)
+            .first()[["name", "market_cap"]]
+            .rename(columns={"market_cap": "first_market_cap"})
+        )
+
+        # Merge into the working DataFrame
+        daily_df = daily_df.merge(first_caps, on="name", how="left")
+
+    # Calculate Δ% MCap (safe division)
+    daily_df["Δ% MCap"] = (
+        100
+        * (daily_df["market_cap"] - daily_df["first_market_cap"])
+        / daily_df["first_market_cap"]
+    )
+
+
     # --- Industry Filter
     industries = sorted(daily_df["industry"].dropna().unique().tolist())
     industries.insert(0, "All")
@@ -166,12 +200,17 @@ def main():
     for industry, group_df in grouped:
         st.markdown(f"#### 🏷️ {industry} ({len(group_df)} companies)")
 
-        display_cols = [
-            "name", "nse_code", "bse_code",
-            "market_cap", "first_market_cap", "%_gain_mc"
+        base_cols   = [
+            "industry",
+            "name",
+            "nse_code",
+            "bse_code",
+            "market_cap",
+            "first_market_cap",
+            "Δ% MCap",
         ]
-        extra_cols = [col for col in ["hits_7", "hits_30", "hits_60", "first_seen_date"] if col in group_df.columns]
-        display_cols = ["industry"] + display_cols + extra_cols
+        extra_cols  = ["hits_7", "hits_30", "hits_60", "first_seen_date"]
+        display_cols = [col for col in base_cols + extra_cols if col in group_df.columns]
 
         display_df = group_df[display_cols].drop(columns=["industry"]).copy()
         display_df = display_df.rename(columns={"%_gain_mc": "Δ% MCap"})
