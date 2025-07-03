@@ -9,7 +9,7 @@ st.sidebar.title("📊 Navigation")
 page_options = {
     "📅 Daily Highs Viewer": "daily_viewer",
     "📈 Momentum Summary": "momentum_summary",
-    "🏆 Top Performers": "top_performers_grouped",
+#    "🏆 Top Performers": "top_performers_grouped",
 #    "🔥 Sector Heatmap": "sector_heatmap",
 }
 
