@@ -200,8 +200,8 @@ def main():
     for industry, group_df in grouped:
         st.markdown(f"#### 🏷️ {industry} ({len(group_df)} companies)")
 
-        base_cols   = ['date', 
-        'name', 'bse_code', 'nse_code', 'industry', 'current_price', 'market_cap', "first_market_cap", "Δ% MCap",'sales', 'operating_profit', 'opm', 'opm_last_year', 'pe', 'pbv', 'peg', 'roa', 'debt_to_equity', 'roe', 'working_capital', 'other_income', 'down_from_52w_high', 'first_seen_date', 'first_market_cap']
+        base_cols   = ['date', 'first_seen_date',
+        'name', 'bse_code', 'nse_code', 'industry', 'current_price', 'market_cap', "first_market_cap", "Δ% MCap",'sales', 'operating_profit', 'opm', 'opm_last_year', 'pe', 'pbv', 'peg', 'roa', 'debt_to_equity', 'roe', 'working_capital', 'other_income', 'down_from_52w_high']
 
         extra_cols  = ["first_seen_date","hits_7", "hits_30", "hits_60"]
         display_cols = [col for col in base_cols + extra_cols if col in group_df.columns]
